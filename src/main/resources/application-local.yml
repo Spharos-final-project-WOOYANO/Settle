@@ -1,0 +1,19 @@
+spring:
+  config:
+    activate:
+      on-profile: local
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/test
+    username: root
+    password: 1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    #db구축되기전까지 각자의 local에서 db 사용해주세요ㅜㅜ
+    #비밀번호는 개인설정에 따라 바꾸시면 됩니다.
+
+  jpa:
+    database: mysql
+    hibernate:
+      ddl-auto: update
+      format_sql: true
+      show-sql: true
