@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: SETTLE-SERVICE
+    name: settle-service
   profiles:
     default: local
 
