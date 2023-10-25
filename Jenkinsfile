@@ -4,13 +4,12 @@ pipeline {
     stages {
         stage('Check') {
             steps {
-                git branch: 'develop',credentialsId:'0-shingo', url:'https://github.com/Spharos-final-project-WOOYANO/Settle'
+                git branch: 'develop',credentialsId:'jenkins-github-access-token', url:'https://github.com/Spharos-final-project-WOOYANO/Settle'
             }
         }
         stage('Build'){
             steps{
                 sh '''
-                    cd Settle
                     chmod +x ./gradlew
                     ./gradlew build -x test
                 '''
@@ -19,7 +18,6 @@ pipeline {
         stage('DockerSize'){
             steps {
                 sh '''
-                    cd server
                     docker stop Settle-Service || true
                     docker rm Settle-Service || true
                     docker rmi Settle-Service-Img || true
