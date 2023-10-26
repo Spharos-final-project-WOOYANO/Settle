@@ -27,7 +27,7 @@ pipeline {
         }
         stage('Deploy'){
             steps{
-                sh 'docker run -d --name settle-service -p 8005:8000 settle-service-img'
+                sh 'docker run -d --name settle-service -p 8006:8000 settle-service-img'
             }
         }
     }
