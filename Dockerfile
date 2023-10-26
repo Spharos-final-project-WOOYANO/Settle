@@ -9,5 +9,5 @@ RUN ./gradlew bootJAR
 
 FROM openjdk:17-alpine
 COPY --from=builder build/libs/*.jar app.jar
-EXPOSE 8005
+EXPOSE 8006
 ENTRYPOINT ["java", "-jar", "/app.jar"]
