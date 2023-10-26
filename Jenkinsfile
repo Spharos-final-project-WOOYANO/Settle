@@ -18,16 +18,16 @@ pipeline {
         stage('DockerSize'){
             steps {
                 sh '''
-                    docker stop Settle-Service || true
-                    docker rm Settle-Service || true
-                    docker rmi Settle-Service-Img || true
-                    docker build -t Settle-Service-Img:latest .
+                    docker stop settle-service || true
+                    docker rm settle-service || true
+                    docker rmi settle-service-img || true
+                    docker build -t settle-service-img:latest .
                 '''
             }
         }
         stage('Deploy'){
             steps{
-                sh 'docker run -d --name Settle-Service -p 8080:8000 Settle-Service-Img'
+                sh 'docker run -d --name settle-service -p 8005:8000 settle-service-img'
             }
         }
     }
