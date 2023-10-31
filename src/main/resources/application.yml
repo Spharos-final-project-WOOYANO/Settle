@@ -5,15 +5,20 @@ spring:
   application:
     name: settle-service
   profiles:
-    default: local
+    default: secret
 
-eureka:
-  client:
-    register-with-eureka: true
-    fetch-registry: true
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/settle?serverTimezone=Asia/Seoul
+    username: pjm
+    password: jmjm1102
 
-  instance:
-    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
-
+    jpa:
+      hibernate:
+        ddl-auto: update
+      properties:
+        hibernate:
+          # show_sql: true
+          format_sql: true
+  logging.level:
+    org.hibernate.SQL: debug
