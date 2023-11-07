@@ -15,8 +15,9 @@ public class SettleController {
     private final SettleService settleService;
 
     @GetMapping("/test")
-    public String test() {
-        return "settle test";
+    public void test() {
+     //  settleService.settle();
+ //       return paymentResultResponseLists;
     }
 
 }

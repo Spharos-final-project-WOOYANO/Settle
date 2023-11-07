@@ -1,24 +1,69 @@
 server:
-  port: 0
+  port: 9010
 
 spring:
   application:
     name: settle-service
   profiles:
     default: secret
-
+---
+spring:
+  config:
+    activate:
+      on-profile: secret
+  kafka:
+    template:
+      default-topic: payment-events
+    consumer:
+      bootstrap-servers: localhost:9092,localhost:9093,localhost:9094
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      group-id: payment-events-listener-group
+      auto-offset-reset: latest
+    topic: payment-events
+    producer:
+      bootstrap-servers: localhost:9092,localhost:9093,localhost:9094
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/settle?serverTimezone=Asia/Seoul
+    jdbcUrl: jdbc:mysql://localhost:3306/settle?serverTimezone=Asia/Seoul
     username: pjm
     password: jmjm1102
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  second-datasource:
+    jdbcUrl: jdbc:mysql://localhost:3306/payment?serverTimezone=Asia/Seoul
+    username: pjm
+    password: jmjm1102
+    driver-class-name: com.mysql.cj.jdbc.Driver
+#    jpa:
+#      hibernate:
+#        ddl-auto: create
+#      properties:
+#        hibernate:
+#          # show_sql: true
+#          format_sql: true
+# application.yml
+hibernate:
+  hbm2ddl:
+     auto: update # or create, validate, none, etc. depending on your use case
+  dialect: org.hibernate.dialect.MySQLDialect # or any other appropriate dialect for your database
+  format_sql: true
 
-    jpa:
-      hibernate:
-        ddl-auto: update
-      properties:
-        hibernate:
-          # show_sql: true
-          format_sql: true
-  logging.level:
-    org.hibernate.SQL: debug
+logging.level:
+  org.hibernate.SQL: debug
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+  instance:
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+
+#axon:
+#  axonserver:
+#    servers: 127.0.0.1:8124
+#  serializer:
+#    general: xstream
