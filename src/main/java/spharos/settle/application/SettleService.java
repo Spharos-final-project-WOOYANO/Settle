@@ -1,33 +1,104 @@
 package spharos.settle.application;
 
+import static java.util.stream.Collectors.summingInt;
+import static spharos.settle.domain.payment.PaymentStatus.CANCEL;
+import static spharos.settle.domain.payment.PaymentStatus.DONE;
+
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import spharos.settle.domain.payment.Payment;
+import spharos.settle.domain.settle.DailySettle;
+import spharos.settle.domain.settle.SettleStatus;
+import spharos.settle.infrastructure.payment.PaymentRepository;
 import spharos.settle.dto.PaymentResultResponseList;
+import spharos.settle.infrastructure.settle.DailySettleRepository;
 
 @Service
 @Slf4j
-public class SettleService implements SettleServiceImpl{
+@RequiredArgsConstructor
+public class SettleService {
 
+    private final PaymentRepository paymentRepository;
+    private final DailySettleRepository dailySettleRepository;
 
-    @Override
+    // 결제 db직접 연결해서 정산
+    // 입금 요청상태
+    @Scheduled(cron = "0 0 0 * * *") // 매일 자정 시작
     public void settle() {
-        //1. payment service 에서 결제 완료된 결제 내역을 조회한다.
-        //스케줄러 - payment(producer) -> settle(consumer) 메세지 발행 하고 consumer onmessage 에서 처리
-        // settle이 consumer로 해서 topic 변경되면 변경한거 이후로확인
+        LocalDateTime currentDateTime = LocalDateTime.now(); // 현재 날짜와 시간
+        // 전날 날짜의 자정 00:00:00
+        LocalDateTime startOfPreviousDate = currentDateTime.minusDays(1).withHour(0).withMinute(0).withSecond(0);
+        // 전날 날짜의 23:59:59
+        LocalDateTime endOfPreviousDate = currentDateTime.minusDays(1).withHour(23).withMinute(59).withSecond(59);
+        LocalDate settlementDate = currentDateTime.toLocalDate().minusDays(1);
+        log.info("lastWednesdayMidnight : {}", startOfPreviousDate);
+        log.info("lastTuesdayMidnight : {}", endOfPreviousDate);
 
-        //2. 각 결제 내역의 client_email 에 해당하는 계좌번호를 가져오고
-        //스케줄러 - user(producer) -> settle(consumer) 메세지 발행 하고 consumer onmessage 에서 처리
+        List<PaymentResultResponseList> filteredPaymentResults = paymentRepository.findByApprovedAtAndPaymentStatus(
+                startOfPreviousDate, endOfPreviousDate, DONE, CANCEL);
 
-        //3. 각 client_email 별로, 정산 금액을 계산해주고 with 수수료 처리
+        //clientEmail별로 총 결제 금액 계산
+        Map<String, Integer> totalAmountByClientEmail = calculateTotalAmountByClientEmail(filteredPaymentResults);
 
-        //4. 계산된 금액을 계죄번호에 보냈는 true false 받는다
-        //정산(producer) - client(consumer) 메세지 발행까지만 구현
+        //날짜별로 정산 결과 저장
+        saveTotalAmountByClientEmail(totalAmountByClientEmail, settlementDate);
 
-        //5. 정산 완료된 결제 내역은 정산 완료 상태로 변경해준다.
-        //settle(producer) -> payment(consumer) consumer-onmessage 에서 finishSettlement() 호출
+    }
 
-        //6. 정산 완료 기록을 저장한다
+    //조회 전주 수요일 부터
+    private LocalDateTime calculateLastWednesdayMidnight(LocalDateTime currentDateTime) {
+        int daysUntilWednesday = DayOfWeek.WEDNESDAY.getValue() - currentDateTime.getDayOfWeek().getValue();
+        if (daysUntilWednesday < 0) {
+            daysUntilWednesday += 7;
+        }
+        return currentDateTime.minusDays(daysUntilWednesday).withHour(0).withMinute(0).withSecond(0);
+    }
+    //조회 이번주 화요일까지
+    private LocalDateTime calculateLastTuesdayMidnight(LocalDateTime currentDateTime) {
+        return currentDateTime.minusDays(1).withHour(23).withMinute(59).withSecond(59);
+    }
+    //clientEmail별로 총 결제 금액 계산
+    private  Map<String, Integer> calculateTotalAmountByClientEmail(List<PaymentResultResponseList> filteredPaymentResults) {
+        return filteredPaymentResults.stream().collect(
+                Collectors.groupingBy(PaymentResultResponseList::getClientEmail,
+                        summingInt(PaymentResultResponseList::getTotalAmount)));
+    }
+    //settle에 clientEmail별로 총 결제 금액 저장
+
+    private void saveTotalAmountByClientEmailToSettle(Map<String, Integer> totalAmountByClientEmail,
+                                                      LocalDate settlementDate) {
+        double feeRate = 0.98;
+        totalAmountByClientEmail.forEach((clientEmail, totalAmount) -> {
+            double adjustedTotalAmount = totalAmount * feeRate;
+            int intTotalAmount = (int) adjustedTotalAmount;
+            SettleStatus depositScheduled = SettleStatus.DEPOSIT_SCHEDULED;
+            DailySettle settle = DailySettle.createSettle(clientEmail, intTotalAmount, settlementDate,depositScheduled);
+            dailySettleRepository.save(settle);
+        });
+    }
+
+
+    private void saveTotalAmountByClientEmail(Map<String, Integer> totalAmountByClientEmail,
+                                                      LocalDate settlementDate) {
+        double feeRate = 0.98;
+        List<DailySettle> settleList = new ArrayList<>();
+        totalAmountByClientEmail.forEach((clientEmail, totalAmount) -> {
+            double adjustedTotalAmount = totalAmount * feeRate;
+            int intTotalAmount = (int) adjustedTotalAmount;
+            SettleStatus depositScheduled = SettleStatus.DEPOSIT_SCHEDULED;
+            DailySettle settle = DailySettle.createSettle(clientEmail, intTotalAmount, settlementDate, depositScheduled);
+            settleList.add(settle);
+        });
+        dailySettleRepository.saveAll(settleList);
     }
 
 
