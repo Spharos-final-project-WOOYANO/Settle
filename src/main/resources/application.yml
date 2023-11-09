@@ -26,23 +26,19 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
   datasource:
-    jdbcUrl: jdbc:mysql://localhost:3306/settle?serverTimezone=Asia/Seoul
+    url: jdbc:mysql://localhost:3306/payment?useSSL=false&useUnicode=true&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true
     username: pjm
     password: jmjm1102
     driver-class-name: com.mysql.cj.jdbc.Driver
   second-datasource:
-    jdbcUrl: jdbc:mysql://localhost:3306/payment?serverTimezone=Asia/Seoul
+    url: jdbc:mysql://localhost:3306/settle?useSSL=false&useUnicode=true&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true
     username: pjm
     password: jmjm1102
     driver-class-name: com.mysql.cj.jdbc.Driver
-#    jpa:
-#      hibernate:
-#        ddl-auto: create
-#      properties:
-#        hibernate:
-#          # show_sql: true
-#          format_sql: true
-# application.yml
+
+  batch:
+    jdbc:
+      initialize-schema: always
 hibernate:
   hbm2ddl:
      auto: update # or create, validate, none, etc. depending on your use case

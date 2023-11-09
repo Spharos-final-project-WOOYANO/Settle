@@ -3,13 +3,13 @@ package spharos.settle.domain.settle;
 
 import spharos.settle.global.CodeValue;
 
-public enum SettleStatus implements CodeValue {
-    DEPOSIT_COMPLETED("0","입금완료"),
-    DEPOSIT_SCHEDULED("1","입금예정");
+public enum SettleStatus  {
+    DEPOSIT_COMPLETED,
+    DEPOSIT_SCHEDULED;
 
 
 
-    private final String code;
+  /*  private final String code;
     private final String value;
 
     SettleStatus(String code, String value) {
@@ -25,5 +25,5 @@ public enum SettleStatus implements CodeValue {
     @Override
     public String getValue() {
         return value;
-    }
+    }*/
 }

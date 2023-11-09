@@ -21,8 +21,10 @@ public class PaymentRepositoryCustomImpl implements PaymentRepositoryCustom{
                                                                             LocalDateTime endDate,
                                                                             PaymentStatus doneStatus,
                                                                             PaymentStatus cancelStatus) {
-        return queryFactory.select(new QPaymentResultResponseList(payment.clientEmail,payment.totalAmount,payment.approvedAt))
-                        .from(payment)
+        List<PaymentResultResponseList> fetch = queryFactory.select(
+                        new QPaymentResultResponseList(payment.clientEmail, payment.totalAmount, payment.approvedAt))
+                .from(payment)
                 .where(payment.approvedAt.between(startDate, endDate),
                         payment.paymentStatus.eq(doneStatus).or(payment.paymentStatus.eq(cancelStatus))).fetch();
-}}
+        return fetch;
+    }}

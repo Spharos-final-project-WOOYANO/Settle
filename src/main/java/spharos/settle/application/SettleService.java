@@ -15,9 +15,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import spharos.settle.common.CommonHttpClient;
 import spharos.settle.domain.payment.Payment;
 import spharos.settle.domain.settle.DailySettle;
 import spharos.settle.domain.settle.SettleStatus;
+import spharos.settle.dto.PaymentResult;
 import spharos.settle.infrastructure.payment.PaymentRepository;
 import spharos.settle.dto.PaymentResultResponseList;
 import spharos.settle.infrastructure.settle.DailySettleRepository;
@@ -79,7 +81,8 @@ public class SettleService {
         double feeRate = 0.98;
         totalAmountByClientEmail.forEach((clientEmail, totalAmount) -> {
             double adjustedTotalAmount = totalAmount * feeRate;
-            int intTotalAmount = (int) adjustedTotalAmount;
+          //  int intTotalAmount = (int) adjustedTotalAmount;
+            long intTotalAmount = (long) adjustedTotalAmount;
             SettleStatus depositScheduled = SettleStatus.DEPOSIT_SCHEDULED;
             DailySettle settle = DailySettle.createSettle(clientEmail, intTotalAmount, settlementDate,depositScheduled);
             dailySettleRepository.save(settle);
@@ -93,13 +96,18 @@ public class SettleService {
         List<DailySettle> settleList = new ArrayList<>();
         totalAmountByClientEmail.forEach((clientEmail, totalAmount) -> {
             double adjustedTotalAmount = totalAmount * feeRate;
-            int intTotalAmount = (int) adjustedTotalAmount;
+            //  int intTotalAmount = (int) adjustedTotalAmount;
+            long intTotalAmount = (long) adjustedTotalAmount;
             SettleStatus depositScheduled = SettleStatus.DEPOSIT_SCHEDULED;
             DailySettle settle = DailySettle.createSettle(clientEmail, intTotalAmount, settlementDate, depositScheduled);
             settleList.add(settle);
         });
         dailySettleRepository.saveAll(settleList);
     }
+    public List<PaymentResult> test(LocalDateTime a, LocalDateTime b){
+        return paymentRepository.teset(a,b);
+    }
+
 
 
 }

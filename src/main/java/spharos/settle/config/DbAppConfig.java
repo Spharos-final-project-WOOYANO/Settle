@@ -11,22 +11,21 @@ import org.springframework.context.annotation.Primary;
 @Configuration
 public class DbAppConfig {
     /* JPA 관련 설정 */
-    @PersistenceContext(unitName = "primaryEntityManager")
+    @PersistenceContext(unitName = "db1EntityManagerFactory")
     private EntityManager primaryEntityManager;
 
-    @PersistenceContext(unitName = "secondEntityManager")
+    @PersistenceContext(unitName = "db2EntityManagerFactory")
     private EntityManager secondEntityManager;
 
     /* QueryDsl 관련 설정 */
-    @Primary // ⭐
-    @Bean
+
+ /*   @Bean
     public JPAQueryFactory primaryQueryFactory() {
         return new JPAQueryFactory(primaryEntityManager);
     }
 
     @Bean
-    @Qualifier("SecondQueryFactory")
     public JPAQueryFactory rawDataQueryFactory() {
         return new JPAQueryFactory(secondEntityManager);
-    }
+    }*/
 }

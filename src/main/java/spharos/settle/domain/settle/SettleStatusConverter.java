@@ -1,3 +1,4 @@
+/*
 package spharos.settle.domain.settle;
 
 import jakarta.persistence.AttributeConverter;
@@ -21,3 +22,4 @@ public class SettleStatusConverter implements AttributeConverter<SettleStatus, S
     }
 
 }
+*/
