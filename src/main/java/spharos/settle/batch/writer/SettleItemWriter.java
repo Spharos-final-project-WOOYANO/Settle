@@ -22,23 +22,16 @@ import spharos.settle.infrastructure.settle.DailySettleRepository;
 @Transactional
 @RequiredArgsConstructor
 @Slf4j
-public class SettleItemWriter implements ItemWriter<PaymentResult> {
+public class SettleItemWriter implements ItemWriter<DailySettle> {
     private final DailySettleRepository dailySettleRepository;
     private static final double vat = 0.02;
 
     @Override
-    public void write(Chunk<? extends PaymentResult> chunk) throws Exception {
+    public void write(Chunk<? extends DailySettle> chunk) throws Exception {
 
 
-    for(PaymentResult paymentResult : chunk){
-        String clientEmail = paymentResult.getClientEmail();
-        long totalAmount = paymentResult.getTotalAmount();
-        long fee = (long) (totalAmount * vat);
-        long paymentAmount = totalAmount - fee;
-        SettleStatus settleStatus = SettleStatus.DEPOSIT_SCHEDULED;
-        DailySettle settle1 = DailySettle.createSettle(clientEmail, totalAmount, LocalDate.now(),settleStatus,fee,paymentAmount);
-        dailySettleRepository.save(settle1);
-
+    for(DailySettle dailySettle : chunk){
+        dailySettleRepository.save(dailySettle);
     }
     }
 }

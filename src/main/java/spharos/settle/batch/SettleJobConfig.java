@@ -7,6 +7,7 @@ import jakarta.persistence.Tuple;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import javax.sql.DataSource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
@@ -16,8 +17,11 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
+import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.database.JpaCursorItemReader;
+import org.springframework.batch.item.database.JpaItemWriter;
 import org.springframework.batch.item.database.JpaPagingItemReader;
+import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
 import org.springframework.batch.item.database.builder.JpaCursorItemReaderBuilder;
 import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,9 +53,12 @@ public class SettleJobConfig {
 
     @Qualifier("db1EntityManagerFactory")
     private final EntityManagerFactory entityManagerFactory;
-    @Autowired
-    LocalContainerEntityManagerFactoryBean readerEntityManagerFactory;
 
+    @Qualifier("db2EntityManagerFactory")
+    private final LocalContainerEntityManagerFactoryBean readerEntityManagerFactory;
+
+    @Qualifier("db2DataSource")
+    private final DataSource dataSource;
 
     @Qualifier("db1TransactionManager")
     private final PlatformTransactionManager transactionManager;
@@ -63,7 +70,7 @@ public class SettleJobConfig {
 
     @Bean
     public Job createJob() {
-        return new JobBuilder("settleJob22", jobRepository)
+        return new JobBuilder("settleJob24", jobRepository)
            //     .validator(new CustomJobParameterValidator())
                 .start(settleStep())
                 .build();
@@ -76,7 +83,7 @@ public class SettleJobConfig {
                 .<PaymentResult, DailySettle>chunk(CHUNK_SIZE,transactionManager) // Chunk 크기를 지정
                 .reader(reader())
                 .processor(paymentItemProcessor)
-                .writer(settleItemWriter)
+                .writer( jdbcBatchItemWriter())
            //     .transactionManager(BeanUtils.getTransactionManagerBean(2))
                 .build();
 
@@ -158,12 +165,21 @@ public QuerydslPagingItemReader<PaymentResult> reader2(){
 
 
 
-/*    @Bean
-    public JpaItemWriter<PaymentResultResponseList> writer() {
-        JpaItemWriter<PaymentResultResponseList> jpaItemWriter = new JpaItemWriter<>();
+/*
+    @Bean
+    public JpaItemWriter<DailySettle> writer() {
+        JpaItemWriter<DailySettle> jpaItemWriter = new JpaItemWriter<>();
         jpaItemWriter.setEntityManagerFactory(entityManagerFactory);
         return jpaItemWriter;
-    }*/
-
+    }
+*/
+    @Bean // beanMapped()을 사용할때는 필수
+    public JdbcBatchItemWriter<DailySettle> jdbcBatchItemWriter() {
+        return new JdbcBatchItemWriterBuilder<DailySettle>()
+            .dataSource(dataSource)
+                .sql("INSERT INTO DailySettle(start_Date, total_Amount, client_Email, settle_Status, fee, pay_Out_Amount) VALUES (:settlementDate, :totalAmount, :clientEmail, :settleType, :fee, :payOutAmount)")
+            .beanMapped()
+            .build();
+}
 
 }

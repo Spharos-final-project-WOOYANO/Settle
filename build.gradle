@@ -53,6 +53,9 @@ dependencies {
 	implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
 	//@nonnill
 	implementation 'com.google.code.findbugs:jsr305:3.0.2'
+	//jdbc
+	implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
+
 
 }
 

@@ -2,6 +2,7 @@ package spharos.settle.batch.processor;
 
 import static java.util.stream.Collectors.summingInt;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -16,20 +17,24 @@ import org.springframework.batch.item.NonTransientResourceException;
 import org.springframework.batch.item.ParseException;
 import org.springframework.batch.item.UnexpectedInputException;
 import org.springframework.stereotype.Component;
+import spharos.settle.domain.payment.Payment;
+import spharos.settle.domain.settle.DailySettle;
+import spharos.settle.domain.settle.SettleStatus;
+import spharos.settle.dto.PaymentResult;
 import spharos.settle.dto.PaymentResultResponseList;
 
 @Component
 @Slf4j
-public class PaymentItemProcessor implements ItemProcessor<PaymentResultResponseList, Map<String, Integer>> {
+public class PaymentItemProcessor implements ItemProcessor<PaymentResult, DailySettle> {
+    private static final double vat = 0.02;
 
     @Override
-    public Map<String, Integer> process(PaymentResultResponseList item) throws Exception {
-        log.info("Processing item: {}", item);
-
-        // 이름을 그룹화하고 합계를 계산하여 Map에 담음
-        Map<String, Integer> resultMap = new HashMap<>();
-        resultMap.put(item.getClientEmail(), item.getTotalAmount());
-
-        return resultMap;
+    public DailySettle process(PaymentResult item) throws Exception {
+        String clientEmail = item.getClientEmail();
+        long totalAmount = item.getTotalAmount();
+        long fee = (long) (totalAmount * vat);
+        long paymentAmount = totalAmount - fee;
+        SettleStatus settleStatus = SettleStatus.DEPOSIT_SCHEDULED;
+        return DailySettle.createSettle(clientEmail, totalAmount, LocalDate.now(),settleStatus,fee,paymentAmount);
     }
 }
