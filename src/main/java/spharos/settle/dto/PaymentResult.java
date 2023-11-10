@@ -8,10 +8,11 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class PaymentResult {
     private String clientEmail; //사업자 이메일
 
-    private int totalAmount; //있
+    private long totalAmount; //있
 
 
 }

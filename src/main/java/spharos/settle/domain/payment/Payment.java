@@ -17,7 +17,6 @@ import lombok.Setter;
 @Entity
 @Getter
 @Table(name = "payment")
-@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Payment {
 

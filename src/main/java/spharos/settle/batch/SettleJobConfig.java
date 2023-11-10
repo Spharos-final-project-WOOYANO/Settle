@@ -16,7 +16,9 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
+import org.springframework.batch.item.database.JpaCursorItemReader;
 import org.springframework.batch.item.database.JpaPagingItemReader;
+import org.springframework.batch.item.database.builder.JpaCursorItemReaderBuilder;
 import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -33,6 +35,7 @@ import spharos.settle.batch.reader.QuerydslNoOffsetPagingItemReader;
 import spharos.settle.batch.reader.QuerydslPagingItemReader;
 import spharos.settle.batch.writer.SettleItemWriter;
 import spharos.settle.domain.payment.Payment;
+import spharos.settle.domain.settle.DailySettle;
 import spharos.settle.dto.PaymentResult;
 import spharos.settle.dto.PaymentResultResponseList;
 
@@ -60,8 +63,8 @@ public class SettleJobConfig {
 
     @Bean
     public Job createJob() {
-        return new JobBuilder("settleJob19", jobRepository)
-                .validator(new CustomJobParameterValidator())
+        return new JobBuilder("settleJob22", jobRepository)
+           //     .validator(new CustomJobParameterValidator())
                 .start(settleStep())
                 .build();
     }
@@ -70,9 +73,9 @@ public class SettleJobConfig {
     @JobScope
     public Step settleStep() {
         return new StepBuilder("settleStep", jobRepository)
-                .<PaymentResult,PaymentResult>chunk(CHUNK_SIZE,transactionManager) // Chunk 크기를 지정
-                .reader(reader2())
-               // .processor(paymentItemProcessor)
+                .<PaymentResult, DailySettle>chunk(CHUNK_SIZE,transactionManager) // Chunk 크기를 지정
+                .reader(reader())
+                .processor(paymentItemProcessor)
                 .writer(settleItemWriter)
            //     .transactionManager(BeanUtils.getTransactionManagerBean(2))
                 .build();
@@ -81,9 +84,9 @@ public class SettleJobConfig {
     //@Value("#{jobParameters['requestDate']}") String requestDate
     @Bean
     @StepScope
-    public JpaPagingItemReader<PaymentResult> reader(@Value("#{jobParameters['requestDate']}") String requestDate) {
+    public JpaPagingItemReader<PaymentResult> reader() {
 
-      //  String requestDate = "2023-11-08";
+        String requestDate = "2023-11-09";
         Map<String, Object> parameters = new LinkedHashMap<>();
         parameters.put("startDateTime", LocalDateTime.parse(requestDate + "T00:00:00"));
         parameters.put("endDateTime", LocalDateTime.parse(requestDate + "T23:59:59"));
@@ -95,7 +98,7 @@ public class SettleJobConfig {
         JpaPagingItemReaderBuilder<PaymentResult> jpaPagingItemReaderBuilder  = new JpaPagingItemReaderBuilder<>();
         JpaPagingItemReader<PaymentResult> paymentItemReader = jpaPagingItemReaderBuilder
                 .name("paymentItemReader")
-                .entityManagerFactory(entityManagerFactory) //readerEntityManagerFactory.getObject()
+                .entityManagerFactory(readerEntityManagerFactory.getObject()) //readerEntityManagerFactory.getObject()
                 .parameterValues(parameters)
                 .queryString(queryString)
                 .pageSize(10)
@@ -104,38 +107,31 @@ public class SettleJobConfig {
         return paymentItemReader;
     }
 
-/*    @Bean
-    public QuerydslNoOffsetPagingItemReader<PaymentResult> reader1(){
+    //@Value("#{jobParameters['requestDate']}") String requestDate
+    @Bean
+    @StepScope
+    public JpaCursorItemReader<PaymentResult> reader3() {
         String requestDate = "2023-11-09";
         Map<String, Object> parameters = new LinkedHashMap<>();
-        LocalDateTime startDateTime = LocalDateTime.parse(requestDate + "T00:00:00");
-        LocalDateTime endDateTime = LocalDateTime.parse(requestDate + "T23:59:59");
-        QuerydslNoOffsetNumberOptions<Payment, Long> options = new QuerydslNoOffsetNumberOptions<>(
-                payment.id, Expression.ASC);
+        parameters.put("startDateTime", LocalDateTime.parse(requestDate + "T00:00:00"));
+        parameters.put("endDateTime", LocalDateTime.parse(requestDate + "T23:59:59"));
 
-       *//* QuerydslNoOffsetPagingItemReader<Tuple> totalAmount = new QuerydslNoOffsetPagingItemReader<>(
-                entityManagerFactory, CHUNK_SIZE, options,
-                queryFactory -> queryFactory.select(payment.clientEmail, payment.totalAmount.sum().as("totalAmount")))
-                        .from(payment)
-                        .where(payment.approvedAt.between(startDateTime, endDateTime))
-                        .groupBy(payment.clientEmail));
-        return totalAmount;*//*
-        QuerydslNoOffsetPagingItemReader<Payment> totalAmount = new QuerydslNoOffsetPagingItemReader<>(
-                entityManagerFactory, CHUNK_SIZE, options,
-                queryFactory -> queryFactory.select(payment.clientEmail, payment.totalAmount.sum().as("totalAmount"))
-                        .from(payment)
-                        .where(payment.approvedAt.between(startDateTime, endDateTime))
-                        .groupBy(payment.clientEmail))
-                .rowMapper(tuple -> {
-                    Payment payment = new Payment();
-                    payment.setClientEmail(tuple.get(payment.clientEmail));
-                    payment.setTotalAmount(tuple.get(1, Long.class)); // totalAmount의 위치에 따라 수정
-                    return payment;
-                });
+        String queryString = String.format("select new %s(p.clientEmail, sum(p.totalAmount)) From Payment p "
+                + "where p.approvedAt between :startDateTime and :endDateTime group by p.clientEmail", PaymentResult.class.getName());
 
-        return totalAmount;
+        JpaCursorItemReaderBuilder<PaymentResult> jpaCursorItemReaderBuilder = new JpaCursorItemReaderBuilder<>();
+        JpaCursorItemReader<PaymentResult> paymentItemReader = jpaCursorItemReaderBuilder
+                .name("paymentItemReader")
+                .entityManagerFactory(entityManagerFactory) // readerEntityManagerFactory.getObject()
+                .parameterValues(parameters)
+                .queryString(queryString)
+                .build();
 
-    }*/
+        log.info("reader={}", paymentItemReader.toString());
+        return paymentItemReader;
+    }
+
+
 
 
 @Bean
