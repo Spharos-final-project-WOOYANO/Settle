@@ -84,7 +84,7 @@ public class SettleService {
           //  int intTotalAmount = (int) adjustedTotalAmount;
             long intTotalAmount = (long) adjustedTotalAmount;
             SettleStatus depositScheduled = SettleStatus.DEPOSIT_SCHEDULED;
-            DailySettle settle = DailySettle.createSettle(clientEmail, intTotalAmount, settlementDate,depositScheduled);
+            DailySettle settle = DailySettle.createSettle(clientEmail, intTotalAmount, settlementDate,depositScheduled,0l,0l);
             dailySettleRepository.save(settle);
         });
     }
@@ -99,7 +99,7 @@ public class SettleService {
             //  int intTotalAmount = (int) adjustedTotalAmount;
             long intTotalAmount = (long) adjustedTotalAmount;
             SettleStatus depositScheduled = SettleStatus.DEPOSIT_SCHEDULED;
-            DailySettle settle = DailySettle.createSettle(clientEmail, intTotalAmount, settlementDate, depositScheduled);
+            DailySettle settle = DailySettle.createSettle(clientEmail, intTotalAmount, settlementDate, depositScheduled,0l,0l);
             settleList.add(settle);
         });
         dailySettleRepository.saveAll(settleList);

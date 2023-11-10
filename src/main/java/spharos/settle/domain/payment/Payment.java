@@ -11,11 +11,13 @@ import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 
 @Entity
 @Getter
 @Table(name = "payment")
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Payment {
 

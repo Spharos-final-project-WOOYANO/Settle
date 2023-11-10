@@ -30,34 +30,35 @@ public class DailySettle {
     @Column(nullable = false,name = "client_Email")
     private String clientEmail; //사업자 이메일
     @Column(nullable = false,name = "total_Amount")
-    private Long totalAmount; //총 금액
+    private long totalAmount; //총 결제 금액
+
+    @Column(nullable = false,name = "fee")
+    private long fee; //수수료
+
+    @Column(nullable = false,name = "pay_Out_Amount")
+    private long payOutAmount; //정산 지급금액
+
+
 
 //    @Column(name = "settle_Status")
-//    @Convert(converter = SettleStatusConverter.class)
+// @Enumerated(EnumType.STRING)
+    @Convert(converter = SettleStatusConverter.class)
     @Column(name = "settle_Status")
-    @Enumerated(EnumType.STRING)
-    private SettleStatus settleType; //결제수단  카드, 간편결제
+    private SettleStatus settleType; //정산 상태 (정산 완료, 정산 예정)
 
-    private DailySettle(LocalDate settlementDate,String clientEmail, Long totalAmount, SettleStatus settleType) {
+    private DailySettle(LocalDate settlementDate,String clientEmail, Long totalAmount, SettleStatus settleType
+    ,Long fee,Long payOutAmount) {
         this.settlementDate = settlementDate;
         this.clientEmail = clientEmail;
         this.totalAmount = totalAmount;
         this.settleType = settleType;
+        this.fee = fee;
+        this.payOutAmount = payOutAmount;
     }
 
-    private DailySettle(LocalDate settlementDate,String clientEmail, Long totalAmount) {
-        this.settlementDate = settlementDate;
-        this.clientEmail = clientEmail;
-        this.totalAmount = totalAmount;
-    }
-    public static DailySettle createSettle(String clientEmail, Long totalAmount, LocalDate settlementDate, SettleStatus settleType) {
-        return new DailySettle(settlementDate, clientEmail, totalAmount, settleType);
-    }
-    public static DailySettle createSettle1(String clientEmail, Long totalAmount, LocalDate settlementDate) {
-        return new DailySettle(settlementDate, clientEmail, totalAmount);
+    public static DailySettle createSettle(String clientEmail, Long totalAmount, LocalDate settlementDate,
+                                           SettleStatus settleType,Long fee,Long payOutAmount) {
+        return new DailySettle(settlementDate, clientEmail, totalAmount, settleType,fee,payOutAmount);
     }
 
-    public void setTotalAmount(int plustotalAmount) {
-        this.totalAmount += plustotalAmount;
-    }
 }

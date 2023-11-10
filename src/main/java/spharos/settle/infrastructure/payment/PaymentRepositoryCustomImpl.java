@@ -2,13 +2,17 @@ package spharos.settle.infrastructure.payment;
 
 import static spharos.settle.domain.payment.QPayment.payment;
 
+import com.querydsl.core.Tuple;
+import com.querydsl.core.types.Projections;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import java.time.LocalDateTime;
 import java.util.List;
+import spharos.settle.domain.payment.Payment;
 import spharos.settle.domain.payment.PaymentStatus;
+import spharos.settle.dto.PaymentResult;
 import spharos.settle.dto.PaymentResultResponseList;
-import spharos.settle.dto.QPaymentResultResponseList;
 
 public class PaymentRepositoryCustomImpl implements PaymentRepositoryCustom{
     private final JPAQueryFactory queryFactory;
@@ -22,9 +26,12 @@ public class PaymentRepositoryCustomImpl implements PaymentRepositoryCustom{
                                                                             PaymentStatus doneStatus,
                                                                             PaymentStatus cancelStatus) {
         List<PaymentResultResponseList> fetch = queryFactory.select(
-                        new QPaymentResultResponseList(payment.clientEmail, payment.totalAmount, payment.approvedAt))
+                        Projections.fields(PaymentResultResponseList.class,payment.clientEmail, payment.totalAmount, payment.approvedAt))
                 .from(payment)
                 .where(payment.approvedAt.between(startDate, endDate),
                         payment.paymentStatus.eq(doneStatus).or(payment.paymentStatus.eq(cancelStatus))).fetch();
         return fetch;
-    }}
+
+
+    }
+}

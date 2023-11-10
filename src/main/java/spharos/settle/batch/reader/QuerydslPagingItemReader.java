@@ -1,4 +1,4 @@
-package spharos.settle.batch;
+package spharos.settle.batch.reader;
 
 
 import com.querydsl.jpa.JPQLQuery;

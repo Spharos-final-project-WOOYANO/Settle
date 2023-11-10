@@ -66,7 +66,7 @@ public class PrimaryDatasourceConfig {
         Map<String, Object> properties = new HashMap<>();
         properties.put("hibernate.dialect", "org.hibernate.dialect.MySQL8Dialect");
         properties.put("hibernate.hbm2ddl.auto", "update");
-
+        properties.put("hibernate.show_sql", "true");
         return builder
                 .dataSource(db1DataSource)
                 .packages("spharos.settle.domain.payment")

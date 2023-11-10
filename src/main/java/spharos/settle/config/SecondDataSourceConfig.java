@@ -62,6 +62,7 @@ public class SecondDataSourceConfig {
                                                                           @Qualifier("db2DataSource") DataSource db2DataSource) {
         Map<String, Object> properties = new HashMap<>();
         properties.put("hibernate.dialect", "org.hibernate.dialect.MySQL8Dialect");
+        properties.put("hibernate.hbm2ddl.auto", "update");
 
         return builder
                 .dataSource(db2DataSource)
