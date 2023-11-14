@@ -1,8 +1,7 @@
+/*
 package spharos.settle.application;
 
 import static java.util.stream.Collectors.summingInt;
-import static spharos.settle.domain.payment.PaymentStatus.CANCEL;
-import static spharos.settle.domain.payment.PaymentStatus.DONE;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -111,3 +110,4 @@ public class SettleService {
 
 
 }
+*/

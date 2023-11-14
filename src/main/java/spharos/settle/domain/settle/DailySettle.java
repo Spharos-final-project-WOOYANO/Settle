@@ -12,7 +12,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import spharos.settle.domain.payment.PaymentTypeConverter;
 
 @Entity
 @Getter
@@ -41,12 +40,13 @@ public class DailySettle {
 
 
 //    @Column(name = "settle_Status")
-// @Enumerated(EnumType.STRING)
-    @Convert(converter = SettleStatusConverter.class)
+ //@Enumerated(EnumType.STRING)
+   // @Convert(converter = SettleStatusConverter.class)
+   // @Enumerated(EnumType.STRING)
     @Column(name = "settle_Status")
-    private SettleStatus settleType; //정산 상태 (정산 완료, 정산 예정)
+    private String settleType; //정산 상태 (정산 완료, 정산 예정)
 
-    private DailySettle(LocalDate settlementDate,String clientEmail, Long totalAmount, SettleStatus settleType
+    private DailySettle(LocalDate settlementDate,String clientEmail, Long totalAmount, String settleType
     ,Long fee,Long payOutAmount) {
         this.settlementDate = settlementDate;
         this.clientEmail = clientEmail;
@@ -57,7 +57,7 @@ public class DailySettle {
     }
 
     public static DailySettle createSettle(String clientEmail, Long totalAmount, LocalDate settlementDate,
-                                           SettleStatus settleType,Long fee,Long payOutAmount) {
+                                           String settleType,Long fee,Long payOutAmount) {
         return new DailySettle(settlementDate, clientEmail, totalAmount, settleType,fee,payOutAmount);
     }
 

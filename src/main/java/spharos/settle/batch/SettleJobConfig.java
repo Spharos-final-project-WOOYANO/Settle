@@ -1,12 +1,18 @@
 package spharos.settle.batch;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQuery;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Tuple;
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import javax.sql.DataSource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,9 +30,12 @@ import org.springframework.batch.item.database.JpaPagingItemReader;
 import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
 import org.springframework.batch.item.database.builder.JpaCursorItemReaderBuilder;
 import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilder;
+import org.springframework.batch.item.kafka.KafkaItemReader;
+import org.springframework.batch.item.kafka.builder.KafkaItemReaderBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -38,29 +47,20 @@ import spharos.settle.batch.reader.QuerydslNoOffsetNumberOptions;
 import spharos.settle.batch.reader.QuerydslNoOffsetPagingItemReader;
 import spharos.settle.batch.reader.QuerydslPagingItemReader;
 import spharos.settle.batch.writer.SettleItemWriter;
-import spharos.settle.domain.payment.Payment;
+import spharos.settle.consumer.ConsumerConfiguration;
 import spharos.settle.domain.settle.DailySettle;
 import spharos.settle.dto.PaymentResult;
 import spharos.settle.dto.PaymentResultResponseList;
 
-
-import static spharos.settle.domain.payment.QPayment.payment;
 
 @Configuration
 @Slf4j
 @RequiredArgsConstructor
 public class SettleJobConfig {
 
-    @Qualifier("db1EntityManagerFactory")
     private final EntityManagerFactory entityManagerFactory;
-
-    @Qualifier("db2EntityManagerFactory")
     private final LocalContainerEntityManagerFactoryBean readerEntityManagerFactory;
-
-    @Qualifier("db2DataSource")
     private final DataSource dataSource;
-
-    @Qualifier("db1TransactionManager")
     private final PlatformTransactionManager transactionManager;
     private final JobRepository jobRepository;
 
@@ -68,9 +68,15 @@ public class SettleJobConfig {
     private final PaymentItemProcessor paymentItemProcessor;
     private final SettleItemWriter settleItemWriter;
 
+    private final KafkaProperties properties;
+    private final ObjectMapper objectMapper;
+    private static final String TOPIC_NAME = "payment-events";
+    private final KafkaProperties kafkaProperties;
+    private final ConsumerConfiguration configuration;
+
     @Bean
     public Job createJob() {
-        return new JobBuilder("settleJob24", jobRepository)
+        return new JobBuilder("settleJob60", jobRepository)
            //     .validator(new CustomJobParameterValidator())
                 .start(settleStep())
                 .build();
@@ -80,14 +86,65 @@ public class SettleJobConfig {
     @JobScope
     public Step settleStep() {
         return new StepBuilder("settleStep", jobRepository)
-                .<PaymentResult, DailySettle>chunk(CHUNK_SIZE,transactionManager) // Chunk 크기를 지정
-                .reader(reader())
+                .<String, DailySettle>chunk(CHUNK_SIZE,transactionManager) // Chunk 크기를 지정
+                .reader(reader4())
                 .processor(paymentItemProcessor)
-                .writer( jdbcBatchItemWriter())
-           //     .transactionManager(BeanUtils.getTransactionManagerBean(2))
+                .writer(jdbcBatchItemWriter())
+
                 .build();
 
     }
+
+
+
+    @Bean
+    @StepScope
+    KafkaItemReader<String, String> reader4() {
+       // Properties props = JobConfig.createProperty(kafkaProperties, ConsumerGroup.REVIEW_JOB);
+        Map<String, Object> stringObjectMap = configuration.stringConsumerConfigs();
+        Properties properties = new Properties();
+        properties.putAll(stringObjectMap);
+        // properties.put("value.deserializer.type", PaymentResult.class.getName());
+
+        KafkaItemReader<String, String> testItemReader = new KafkaItemReaderBuilder<String, String>()
+                .partitions(0,1,2)
+                .partitionOffsets(new HashMap<>())
+                .consumerProperties(properties)
+                .name("testItemReader")
+                .saveState(true)
+                .pollTimeout(Duration.ofSeconds(10L))
+                .topic("test-events")
+                .build();
+
+        log.info("reader={}",testItemReader);
+        return testItemReader;
+    }
+/*    @Bean
+    @StepScope
+    KafkaItemReader<String, String> reader4() {
+        // Properties props = JobConfig.createProperty(kafkaProperties, ConsumerGroup.REVIEW_JOB);
+        Properties properties = new Properties();
+        properties.putAll(kafkaProperties.buildConsumerProperties());
+        properties.put("group.id", "test-events-listener-group");
+        properties.put("bootstrap.servers", "localhost:9092");
+        properties.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+        properties.put("value.deserializer","org.apache.kafka.common.serialization.StringDeserializer");
+
+        KafkaItemReader<String, String> testItemReader = new KafkaItemReaderBuilder<String, String>()
+                .partitions(0)
+                .partitionOffsets(new HashMap<>())
+                .consumerProperties(properties)
+                .name("testItemReader")
+                .saveState(true)
+                .pollTimeout(Duration.ofSeconds(10L))
+                .topic("test-events")
+                .build();
+        log.info("reader={}",testItemReader);
+        return testItemReader;
+    }*/
+
+
+
     //@Value("#{jobParameters['requestDate']}") String requestDate
     @Bean
     @StepScope
@@ -105,7 +162,7 @@ public class SettleJobConfig {
         JpaPagingItemReaderBuilder<PaymentResult> jpaPagingItemReaderBuilder  = new JpaPagingItemReaderBuilder<>();
         JpaPagingItemReader<PaymentResult> paymentItemReader = jpaPagingItemReaderBuilder
                 .name("paymentItemReader")
-                .entityManagerFactory(readerEntityManagerFactory.getObject()) //readerEntityManagerFactory.getObject()
+                .entityManagerFactory(entityManagerFactory) //readerEntityManagerFactory.getObject()
                 .parameterValues(parameters)
                 .queryString(queryString)
                 .pageSize(10)
@@ -134,13 +191,14 @@ public class SettleJobConfig {
                 .queryString(queryString)
                 .build();
 
-        log.info("reader={}", paymentItemReader.toString());
+        log.info("reader={}", paymentItemReader);
         return paymentItemReader;
     }
 
 
 
 
+/*
 @Bean
 public QuerydslPagingItemReader<PaymentResult> reader2(){
     String requestDate = "2023-11-09";
@@ -160,6 +218,7 @@ public QuerydslPagingItemReader<PaymentResult> reader2(){
     return totalAmount;
     //Projections.fields(PaymentResult.class,payment.clientEmail,payment.totalAmount.sum().as("totalAmount"))
 }
+*/
 
 
 
@@ -175,11 +234,14 @@ public QuerydslPagingItemReader<PaymentResult> reader2(){
 */
     @Bean // beanMapped()을 사용할때는 필수
     public JdbcBatchItemWriter<DailySettle> jdbcBatchItemWriter() {
-        return new JdbcBatchItemWriterBuilder<DailySettle>()
-            .dataSource(dataSource)
-                .sql("INSERT INTO DailySettle(start_Date, total_Amount, client_Email, settle_Status, fee, pay_Out_Amount) VALUES (:settlementDate, :totalAmount, :clientEmail, :settleType, :fee, :payOutAmount)")
-            .beanMapped()
-            .build();
-}
+
+        JdbcBatchItemWriter<DailySettle> build = new JdbcBatchItemWriterBuilder<DailySettle>()
+                .dataSource(dataSource)
+                .sql("INSERT INTO DailySettle(start_Date, total_Amount, client_Email, settle_Status, fee, pay_Out_Amount) "
+                        + "VALUES (:settlementDate, :totalAmount, :clientEmail, :settleType, :fee, :payOutAmount)")
+                .beanMapped()
+                .build();
+        return build;
+    }
 
 }

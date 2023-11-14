@@ -8,8 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import spharos.settle.application.SettleService;
-import spharos.settle.domain.payment.Payment;
 import spharos.settle.dto.PaymentResult;
 import spharos.settle.dto.PaymentResultResponseList;
 
@@ -17,7 +15,7 @@ import spharos.settle.dto.PaymentResultResponseList;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/settle")
 public class SettleController {
-    private final SettleService settleService;
+   /* private final SettleService settleService;
 
     @GetMapping("/test")
     public  List<PaymentResult> test() {
@@ -29,6 +27,6 @@ public class SettleController {
         List<PaymentResult> test = settleService.test(parse,parse1);
         return  test;
         //       return paymentResultResponseLists;
-    }
+    }*/
 
 }

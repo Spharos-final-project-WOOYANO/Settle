@@ -1,9 +1,9 @@
+/*
 package spharos.settle.domain.settle;
 
 import jakarta.persistence.AttributeConverter;
 import java.util.EnumSet;
 import java.util.NoSuchElementException;
-import spharos.settle.domain.payment.PaymentStatus;
 
 public class SettleStatusConverter implements AttributeConverter<SettleStatus, String> {
 
@@ -21,3 +21,4 @@ public class SettleStatusConverter implements AttributeConverter<SettleStatus, S
     }
 
 }
+*/

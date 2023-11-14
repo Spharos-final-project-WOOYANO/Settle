@@ -11,7 +11,6 @@ import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import spharos.settle.domain.payment.Payment;
 import spharos.settle.domain.settle.DailySettle;
 import spharos.settle.domain.settle.SettleStatus;
 import spharos.settle.dto.PaymentResult;
@@ -28,7 +27,7 @@ public class SettleItemWriter implements ItemWriter<DailySettle> {
 
     @Override
     public void write(Chunk<? extends DailySettle> chunk) throws Exception {
-
+    log.info("chunk : {}", chunk);
 
     for(DailySettle dailySettle : chunk){
         dailySettleRepository.save(dailySettle);

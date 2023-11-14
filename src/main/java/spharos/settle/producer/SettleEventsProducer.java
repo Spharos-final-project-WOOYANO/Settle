@@ -1,3 +1,4 @@
+/*
 package spharos.settle.producer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -60,3 +61,4 @@ public class SettleEventsProducer {
 
     }
 }
+*/
