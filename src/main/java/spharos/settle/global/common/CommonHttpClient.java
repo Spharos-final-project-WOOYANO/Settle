@@ -1,4 +1,4 @@
-package spharos.settle.common;
+package spharos.settle.global.common;
 
 
 import java.io.IOException;

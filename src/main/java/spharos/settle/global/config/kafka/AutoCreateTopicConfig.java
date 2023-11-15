@@ -1,4 +1,4 @@
-package spharos.settle.config;
+package spharos.settle.global.config.kafka;
 
 
 import org.apache.kafka.clients.admin.NewTopic;

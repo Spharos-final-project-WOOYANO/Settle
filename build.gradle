@@ -55,6 +55,8 @@ dependencies {
 	implementation 'com.google.code.findbugs:jsr305:3.0.2'
 	//jdbc
 	implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
+	// Swagger
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
 
 
 }

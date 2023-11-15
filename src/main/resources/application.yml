@@ -1,61 +1,27 @@
 server:
-  port: 9010
+  port: 0
 
 spring:
   application:
     name: settle-service
   profiles:
-    default: secret
----
-spring:
-  config:
-    activate:
-      on-profile: secret
-  kafka:
-    template:
-      default-topic: payment-events
-    consumer:
-      bootstrap-servers: localhost:9092,localhost:9093,localhost:9094
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      group-id: payment-events-listener-group
-      auto-offset-reset: latest
-    topic: payment-events
-    producer:
-      bootstrap-servers: localhost:9092,localhost:9093,localhost:9094
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.StringSerializer
-  datasource:
-    url: jdbc:mysql://localhost:3306/settle?useSSL=false&useUnicode=true&characterencoding=utf8mb4&serverTimezone=Asia/Seoul
-    username: pjm
-    password: jmjm1102
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    default: local
 
-  batch:
-    jdbc:
-      initialize-schema: always
-  jpa:
-    hibernate:
-      ddl-auto: create
-    properties:
-      hibernate:
-        # show_sql: true
-        format_sql: true
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    groups-order: DESC
+    operationsSorter: method
+    disable-swagger-default-url: true
+    display-request-duration: true
+  api-docs:
+    path: /api-docs
+  show-actuator: true
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
+  paths-to-match:
+    - /api/v1/**
 
-logging.level:
-  org.hibernate.SQL: debug
-
-eureka:
-  client:
-    register-with-eureka: true
-    fetch-registry: true
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
-
-  instance:
-    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
-
-#axon:
 #  axonserver:
 #    servers: 127.0.0.1:8124
 #  serializer:
