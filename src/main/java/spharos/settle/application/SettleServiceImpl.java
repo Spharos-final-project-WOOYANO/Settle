@@ -1,12 +1,15 @@
 package spharos.settle.application;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import java.time.LocalDate;
 import java.util.List;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import spharos.settle.dto.PaymentResultResponseList;
+import spharos.settle.domain.settle.DailySettle;
+import spharos.settle.dto.DailySettleListResponse;
+import spharos.settle.dto.DailySettleResponse;
 
 public interface SettleServiceImpl {
-    void settle(ConsumerRecord<String, String> consumerRecord) throws JsonProcessingException;
+    DailySettleResponse getSettle(Long id);
+    List<DailySettle> getList();
+    List<DailySettleListResponse> getSettleInRange(LocalDate startDate, LocalDate endDate);
    // List<PaymentResultResponseList> processPaymentResult(ConsumerRecord<String, String> consumerRecord)throws JsonProcessingException;
 
 }

@@ -1,37 +1,61 @@
-/*
 package spharos.settle.application;
 
-import static java.util.stream.Collectors.summingInt;
-
-import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import spharos.settle.common.CommonHttpClient;
-import spharos.settle.domain.payment.Payment;
+
 import spharos.settle.domain.settle.DailySettle;
-import spharos.settle.domain.settle.SettleStatus;
-import spharos.settle.dto.PaymentResult;
-import spharos.settle.infrastructure.payment.PaymentRepository;
-import spharos.settle.dto.PaymentResultResponseList;
-import spharos.settle.infrastructure.settle.DailySettleRepository;
+import spharos.settle.dto.DailySettleListResponse;
+import spharos.settle.dto.DailySettleResponse;
+import spharos.settle.infrastructure.DailySettleRepository;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class SettleService {
 
-    private final PaymentRepository paymentRepository;
     private final DailySettleRepository dailySettleRepository;
 
-    // 결제 db직접 연결해서 정산
+    public List<DailySettleListResponse> getSettleInRange(String clientEmail,LocalDate startDate, LocalDate endDate) {
+
+        List<DailySettleListResponse> collect = dailySettleRepository.findBySettlementDateBetween(clientEmail,
+                        startDate, endDate)
+                .stream()
+                .map(dailySettle -> {
+                    DailySettleListResponse response = new DailySettleListResponse();
+                    // 필드들을 매핑
+                    response.setId(dailySettle.getId());
+                    response.setSettleType(dailySettle.getSettleType());
+                    response.setPayOutAmount(dailySettle.getPayOutAmount());
+                    response.setSettlementDate(dailySettle.getSettlementDate());
+                    // 필요한 만큼 계속해서 매핑
+                    return response;
+                })
+                .collect(Collectors.toList());
+        log.info("collect : {}", collect);
+        return collect;
+    }
+
+    public DailySettleResponse getSettle(Long id){
+        DailySettle dailySettle = dailySettleRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("정산 내역이 없습니다."));
+        return DailySettleResponse.builder()
+                .settleType(dailySettle.getSettleType())
+                .totalAmount(dailySettle.getTotalAmount())
+                .fee(dailySettle.getFee())
+                .payOutAmount(dailySettle.getPayOutAmount())
+                .settlementDate(dailySettle.getSettlementDate())
+                .build();
+    }
+    public Long sumTotalAmountByClientEmailAndSettlementDate(String clientEmail, LocalDate startDate, LocalDate endDate){
+        return dailySettleRepository.sumTotalAmountByClientEmailAndSettlementDate(clientEmail,startDate,endDate);
+    }
+
+
+   /* // 결제 db직접 연결해서 정산
     // 입금 요청상태
     @Scheduled(cron = "0 0 0 * * *") // 매일 자정 시작
     public void settle() {
@@ -105,9 +129,8 @@ public class SettleService {
     }
     public List<PaymentResult> test(LocalDateTime a, LocalDateTime b){
         return paymentRepository.teset(a,b);
-    }
+    }*/
 
 
 
 }
-*/

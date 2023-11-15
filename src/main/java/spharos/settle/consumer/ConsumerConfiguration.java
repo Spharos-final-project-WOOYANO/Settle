@@ -3,17 +3,24 @@ package spharos.settle.consumer;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.dao.RecoverableDataAccessException;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.listener.CommonErrorHandler;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
+import org.springframework.kafka.listener.ConsumerRecordRecoverer;
+import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
+import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.util.backoff.FixedBackOff;
 import spharos.settle.dto.PaymentResult;
 
 @Configuration
@@ -48,8 +55,32 @@ public class ConsumerConfiguration {
         factory.setConsumerFactory(stringConsumerFactory());
         factory.setBatchListener(true);
         //  factory.setConcurrency(3);
+   //     factory.setCommonErrorHandler(errorHandler());
         return factory;
     }
+
+/*    private DefaultErrorHandler errorHandler() {
+        var fixedBackOff = new FixedBackOff(1000L, 2L);
+        new DefaultErrorHandler(
+                publishingRecover(),
+                fixedBackOff
+        )
+    }
+
+    private DeadLetterPublishingRecoverer publishingRecover() {
+        DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(kafkaTemplate
+                , (r, e) -> {
+          //  log.error("Exception in publishingRecoverer : {} ", e.getMessage(), e);
+            if (e.getCause() instanceof RecoverableDataAccessException) {
+                return new TopicPartition(retryTopic, r.partition());
+            } else {
+                return new TopicPartition(deadLetterTopic, r.partition());
+            }
+        }
+        );
+
+        return recoverer;
+    }*/
 
     @Bean
     public Map<String, Object> DTOConsumerConfigs() {
@@ -77,7 +108,7 @@ public class ConsumerConfiguration {
         ConcurrentKafkaListenerContainerFactory<String, PaymentResult> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(DTOConsumerFactory());
-        factory.setBatchListener(true);
+      //  factory.setBatchListener(true);
         return factory;
     }
 }

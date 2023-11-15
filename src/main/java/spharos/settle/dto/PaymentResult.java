@@ -1,7 +1,6 @@
 package spharos.settle.dto;
 
-import com.querydsl.core.annotations.QueryProjection;
-import java.time.LocalDateTime;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

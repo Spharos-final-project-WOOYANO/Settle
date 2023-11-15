@@ -50,7 +50,6 @@ import spharos.settle.batch.writer.SettleItemWriter;
 import spharos.settle.consumer.ConsumerConfiguration;
 import spharos.settle.domain.settle.DailySettle;
 import spharos.settle.dto.PaymentResult;
-import spharos.settle.dto.PaymentResultResponseList;
 
 
 @Configuration
@@ -76,7 +75,7 @@ public class SettleJobConfig {
 
     @Bean
     public Job createJob() {
-        return new JobBuilder("settleJob60", jobRepository)
+        return new JobBuilder("settleJob62", jobRepository)
            //     .validator(new CustomJobParameterValidator())
                 .start(settleStep())
                 .build();
@@ -119,29 +118,7 @@ public class SettleJobConfig {
         log.info("reader={}",testItemReader);
         return testItemReader;
     }
-/*    @Bean
-    @StepScope
-    KafkaItemReader<String, String> reader4() {
-        // Properties props = JobConfig.createProperty(kafkaProperties, ConsumerGroup.REVIEW_JOB);
-        Properties properties = new Properties();
-        properties.putAll(kafkaProperties.buildConsumerProperties());
-        properties.put("group.id", "test-events-listener-group");
-        properties.put("bootstrap.servers", "localhost:9092");
-        properties.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-        properties.put("value.deserializer","org.apache.kafka.common.serialization.StringDeserializer");
 
-        KafkaItemReader<String, String> testItemReader = new KafkaItemReaderBuilder<String, String>()
-                .partitions(0)
-                .partitionOffsets(new HashMap<>())
-                .consumerProperties(properties)
-                .name("testItemReader")
-                .saveState(true)
-                .pollTimeout(Duration.ofSeconds(10L))
-                .topic("test-events")
-                .build();
-        log.info("reader={}",testItemReader);
-        return testItemReader;
-    }*/
 
 
 
@@ -218,26 +195,28 @@ public QuerydslPagingItemReader<PaymentResult> reader2(){
     return totalAmount;
     //Projections.fields(PaymentResult.class,payment.clientEmail,payment.totalAmount.sum().as("totalAmount"))
 }
+
 */
 
 
 
 
 
-/*
+
     @Bean
     public JpaItemWriter<DailySettle> writer() {
         JpaItemWriter<DailySettle> jpaItemWriter = new JpaItemWriter<>();
         jpaItemWriter.setEntityManagerFactory(entityManagerFactory);
         return jpaItemWriter;
     }
-*/
+
+
     @Bean // beanMapped()을 사용할때는 필수
     public JdbcBatchItemWriter<DailySettle> jdbcBatchItemWriter() {
 
         JdbcBatchItemWriter<DailySettle> build = new JdbcBatchItemWriterBuilder<DailySettle>()
                 .dataSource(dataSource)
-                .sql("INSERT INTO DailySettle(start_Date, total_Amount, client_Email, settle_Status, fee, pay_Out_Amount) "
+                .sql("INSERT INTO Daily_Settle(start_Date, total_Amount, client_Email, settle_Status, fee, pay_Out_Amount) "
                         + "VALUES (:settlementDate, :totalAmount, :clientEmail, :settleType, :fee, :payOutAmount)")
                 .beanMapped()
                 .build();

@@ -23,7 +23,6 @@ import org.springframework.stereotype.Component;
 import spharos.settle.domain.settle.DailySettle;
 import spharos.settle.domain.settle.SettleStatus;
 import spharos.settle.dto.PaymentResult;
-import spharos.settle.dto.PaymentResultResponseList;
 
 @Component
 @Slf4j
