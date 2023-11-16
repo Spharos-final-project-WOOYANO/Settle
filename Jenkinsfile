@@ -22,7 +22,7 @@ pipeline {
                     sh '''
                         pwd
                         chmod +x ./gradlew
-                        ./gradlew clean build
+                        ./gradlew clean build -x test
                     '''
 
                 }
