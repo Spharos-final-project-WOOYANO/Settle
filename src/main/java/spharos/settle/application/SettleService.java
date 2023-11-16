@@ -17,7 +17,7 @@ import spharos.settle.infrastructure.DailySettleRepository;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class SettleService {
+public class SettleService implements SettleServiceImpl {
 
     private final DailySettleRepository dailySettleRepository;
 
@@ -39,6 +39,9 @@ public class SettleService {
                 .settlementDate(dailySettle.getSettlementDate())
                 .build();
     }
+
+
+
     public Long sumTotalAmountByClientEmailAndSettlementDate(String clientEmail, LocalDate startDate, LocalDate endDate){
         return dailySettleRepository.sumTotalAmountByClientEmailAndSettlementDate(clientEmail,startDate,endDate);
     }

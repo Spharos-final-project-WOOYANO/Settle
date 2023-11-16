@@ -44,7 +44,7 @@ public class DailySettleController {
        return new BaseResponse<>(settleInRange);
     }
     //정산 리스트 조회 시 총 정산 금액
-    @GetMapping("/total")
+    @GetMapping("/totalAmount")
     public BaseResponse<?> getTotal(@RequestParam String clientEmail,@RequestParam LocalDate startDate, @RequestParam LocalDate endDate) {
         Long total = settleService.sumTotalAmountByClientEmailAndSettlementDate(clientEmail, startDate, endDate);
         return new BaseResponse<>(total);

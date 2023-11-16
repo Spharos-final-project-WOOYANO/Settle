@@ -75,7 +75,7 @@ public class SettleJobConfig {
 
     @Bean
     public Job createJob() {
-        return new JobBuilder("settleJob62", jobRepository)
+        return new JobBuilder("settleJob", jobRepository)
            //     .validator(new CustomJobParameterValidator())
                 .start(settleStep())
                 .build();
@@ -89,6 +89,7 @@ public class SettleJobConfig {
                 .reader(reader4())
                 .processor(paymentItemProcessor)
                 .writer(jdbcBatchItemWriter())
+                .allowStartIfComplete(true) // 스텝을 완료 상태에서 다시 시작할 수 있도록 설정
 
                 .build();
 

@@ -11,6 +11,12 @@ spring:
     username: pjm
     password: jmjm1102
     driver-class-name: com.mysql.cj.jdbc.Driver
+  batch:
+    jdbc:
+      initialize-schema: always
+    job:
+      enabled: false
+
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
