@@ -9,10 +9,10 @@ pipeline {
 	stage('Secret-File Download'){
 	    steps {
 	        withCredentials([
-		    file(credentialsId: 'Kafka-Secret-File', variable: 'kafkaSecret')
+		    file(credentialsId: 'Batch-Secret-File', variable: 'batchSecret')
 		    ])
 		{
-		    sh "cp \$kafkaSecret ./src/main/resources/application-secret.yml"
+		    sh "cp \$batchSecret ./src/main/resources/application-secret.yml"
 		}
 	    }
 	}
