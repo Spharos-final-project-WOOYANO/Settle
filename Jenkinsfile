@@ -41,7 +41,7 @@ pipeline {
         }
         stage('Deploy'){
             steps{
-                sh 'docker run -d --network spharos-network -e EUREKA_URL="${EUREKA_URL}" -e KAFKA_URL1="${KAFKA_URL1}" --name settle-service settle-service-img'
+                sh 'docker run -d --restart=always --network spharos-network -e EUREKA_URL="${EUREKA_URL}" --name settle-service settle-service-img'
 
             }
         }
