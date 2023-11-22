@@ -51,8 +51,9 @@ public class PaymentItemProcessor implements ItemProcessor<String, DailySettle> 
         return settle;*/
 
         PaymentResult paymentResult = objectMapper.readValue(item, PaymentResult.class);
+        log.info("paymentResult : {}", paymentResult);
         String clientEmail = paymentResult.getClientEmail();
-        Long totalAmount = paymentResult.getTotalAmount();
+        long totalAmount = paymentResult.getTotalAmount();
 
         long fee = (long) (totalAmount * vat);
         long paymentAmount = totalAmount - fee;
