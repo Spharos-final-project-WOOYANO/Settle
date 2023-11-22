@@ -40,6 +40,8 @@ public class ConsumerConfiguration {
     /*public ConsumerConfiguration(KafkaProperties properties) {
         this.properties = properties;
     }*/
+    @Value("${spring.kafka.consumer.bootstrap-servers}")
+    private String bootstrapServers;
 
     @Value("${topics.retry:library-events.RETRY}")
     private String retryTopic;
@@ -50,7 +52,7 @@ public class ConsumerConfiguration {
     @Bean
     public Map<String, Object> stringConsumerConfigs() {
         Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, properties.getBootstrapServers());
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "settle");
