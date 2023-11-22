@@ -47,6 +47,7 @@ public class SettleService implements SettleServiceImpl {
     }
 
 
+
    /* // 결제 db직접 연결해서 정산
     // 입금 요청상태
     @Scheduled(cron = "0 0 0 * * *") // 매일 자정 시작

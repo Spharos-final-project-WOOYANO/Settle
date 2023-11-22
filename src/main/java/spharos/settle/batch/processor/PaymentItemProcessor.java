@@ -33,10 +33,27 @@ public class PaymentItemProcessor implements ItemProcessor<String, DailySettle> 
 
     @Override
     public DailySettle process(String item) throws Exception {
-        PaymentResult paymentResult = objectMapper.readValue(item, new TypeReference<PaymentResult>() {
-        });
+       /* DailySettle settle = null;
+        //Map<String, Long> resultMap = objectMapper.readValue(item, HashMap.class);
+        Map<String, Long> resultMap = objectMapper.readValue(item, new TypeReference<Map<String, Long>>() {});
+
+        for (Map.Entry<String, Long> entry : resultMap.entrySet()) {
+            String clientEmail = entry.getKey();
+            Long totalAmount = entry.getValue();
+            long fee = (long) (totalAmount * vat);
+            long paymentAmount = totalAmount - fee;
+            String settleStatus = "0";
+            settle = DailySettle.createSettle(clientEmail, totalAmount, LocalDate.now(), settleStatus, fee,
+                    paymentAmount);
+
+        }
+        log.info("settle : {}", settle);
+        return settle;*/
+
+        PaymentResult paymentResult = objectMapper.readValue(item, PaymentResult.class);
         String clientEmail = paymentResult.getClientEmail();
-        long totalAmount = paymentResult.getTotalAmount();
+        Long totalAmount = paymentResult.getTotalAmount();
+
         long fee = (long) (totalAmount * vat);
         long paymentAmount = totalAmount - fee;
         //SettleStatus settleStatus = SettleStatus.DEPOSIT_SCHEDULED;

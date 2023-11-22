@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import spharos.settle.application.SettleService;
+import spharos.settle.batch.BatchScheduler;
 import spharos.settle.domain.settle.DailySettle;
 import spharos.settle.global.common.response.BaseResponse;
 import spharos.settle.dto.DailySettleListResponse;
@@ -23,6 +24,7 @@ import spharos.settle.dto.DailySettleResponse;
 @RequestMapping("/api/v1/settle")
 public class DailySettleController {
     private final SettleService settleService;
+    private final BatchScheduler batchScheduler;
 
    /* @GetMapping("/test")
     public  List<PaymentResult> test() {
@@ -55,6 +57,12 @@ public class DailySettleController {
         DailySettleResponse settle = settleService.getSettle(id);
         return new BaseResponse<>(settle);
     }
+
+    @GetMapping("/test")
+    public void test(){
+       batchScheduler.runJob();
+    }
+
 
 
 }
