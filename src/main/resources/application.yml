@@ -5,7 +5,7 @@ spring:
   application:
     name: settle-service
   profiles:
-    default: local
+    default: secret
 
 springdoc:
   swagger-ui:
