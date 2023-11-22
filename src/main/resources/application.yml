@@ -5,17 +5,7 @@ spring:
   application:
     name: settle-service
   profiles:
-    default: secret
-  datasource:
-    url: jdbc:mysql://localhost:3306/settle?useSSL=false&useUnicode=true&serverTimezone=Asia/Seoul
-    username: pjm
-    password: jmjm1102
-    driver-class-name: com.mysql.cj.jdbc.Driver
-  batch:
-    jdbc:
-      initialize-schema: always
-    job:
-      enabled: false
+    default: local
 
 springdoc:
   swagger-ui:
