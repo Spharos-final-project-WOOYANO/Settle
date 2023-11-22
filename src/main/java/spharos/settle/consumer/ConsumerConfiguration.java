@@ -71,8 +71,8 @@ public class ConsumerConfiguration {
         ConcurrentKafkaListenerContainerFactory<String, String> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(stringConsumerFactory());
-        factory.setBatchListener(true);
-        //  factory.setConcurrency(3);
+        //factory.setBatchListener(true);
+        factory.setConcurrency(1);
     //    factory.setCommonErrorHandler(errorHandler());
         return factory;
     }
