@@ -103,6 +103,7 @@ public class SettleJobConfig {
        // Properties props = JobConfig.createProperty(kafkaProperties, ConsumerGroup.REVIEW_JOB);
         Map<String, Object> stringObjectMap = configuration.stringConsumerConfigs();
         Properties properties = new Properties();
+        log.info("stringObjectMap={}",stringObjectMap.entrySet());
         properties.putAll(stringObjectMap);
         // properties.put("value.deserializer.type", PaymentResult.class.getName());
 
