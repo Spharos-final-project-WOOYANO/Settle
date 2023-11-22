@@ -62,6 +62,7 @@ public class PaymentItemProcessor implements ItemProcessor<String, DailySettle> 
 
         DailySettle settle = DailySettle.createSettle(clientEmail, totalAmount, LocalDate.now(), settleStatus, fee,
                 paymentAmount);
+        log.info("settle : {}", settle);
         return settle;
     }
 }
