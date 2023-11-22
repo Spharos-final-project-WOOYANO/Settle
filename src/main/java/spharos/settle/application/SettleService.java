@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import spharos.settle.domain.settle.DailySettle;
@@ -15,28 +17,15 @@ import spharos.settle.infrastructure.DailySettleRepository;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class SettleService {
+public class SettleService implements SettleServiceImpl {
 
     private final DailySettleRepository dailySettleRepository;
 
-    public List<DailySettleListResponse> getSettleInRange(String clientEmail,LocalDate startDate, LocalDate endDate) {
+    public Page<DailySettleListResponse> getSettleInRange(String clientEmail, LocalDate startDate, LocalDate endDate,
+                                                          Pageable pageable) {
 
-        List<DailySettleListResponse> collect = dailySettleRepository.findBySettlementDateBetween(clientEmail,
-                        startDate, endDate)
-                .stream()
-                .map(dailySettle -> {
-                    DailySettleListResponse response = new DailySettleListResponse();
-                    // 필드들을 매핑
-                    response.setId(dailySettle.getId());
-                    response.setSettleType(dailySettle.getSettleType());
-                    response.setPayOutAmount(dailySettle.getPayOutAmount());
-                    response.setSettlementDate(dailySettle.getSettlementDate());
-                    // 필요한 만큼 계속해서 매핑
-                    return response;
-                })
-                .collect(Collectors.toList());
-        log.info("collect : {}", collect);
-        return collect;
+        return dailySettleRepository.findBySettlementDateBetween(clientEmail, startDate, endDate, pageable);
+
     }
 
     public DailySettleResponse getSettle(Long id){
@@ -50,9 +39,13 @@ public class SettleService {
                 .settlementDate(dailySettle.getSettlementDate())
                 .build();
     }
+
+
+
     public Long sumTotalAmountByClientEmailAndSettlementDate(String clientEmail, LocalDate startDate, LocalDate endDate){
         return dailySettleRepository.sumTotalAmountByClientEmailAndSettlementDate(clientEmail,startDate,endDate);
     }
+
 
 
    /* // 결제 db직접 연결해서 정산

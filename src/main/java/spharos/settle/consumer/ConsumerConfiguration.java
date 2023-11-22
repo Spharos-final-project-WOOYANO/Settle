@@ -2,9 +2,11 @@ package spharos.settle.consumer;
 
 import java.util.HashMap;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -14,6 +16,7 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.listener.CommonErrorHandler;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.listener.ConsumerRecordRecoverer;
@@ -22,15 +25,28 @@ import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.util.backoff.FixedBackOff;
 import spharos.settle.dto.PaymentResult;
+import org.springframework.beans.factory.annotation.Value;
 
 @Configuration
+@Slf4j
 @EnableConfigurationProperties(KafkaProperties.class)
 public class ConsumerConfiguration {
-    private final KafkaProperties properties;
+    @Autowired
+    KafkaProperties properties;
 
-    public ConsumerConfiguration(KafkaProperties properties) {
+    @Autowired
+    KafkaTemplate kafkaTemplate;
+
+    /*public ConsumerConfiguration(KafkaProperties properties) {
         this.properties = properties;
-    }
+    }*/
+
+    @Value("${topics.retry:library-events.RETRY}")
+    private String retryTopic;
+
+    @Value("${topics.dlt:library-events.DLT}")
+    private String deadLetterTopic;
+
     @Bean
     public Map<String, Object> stringConsumerConfigs() {
         Map<String, Object> props = new HashMap<>();
@@ -55,16 +71,21 @@ public class ConsumerConfiguration {
         factory.setConsumerFactory(stringConsumerFactory());
         factory.setBatchListener(true);
         //  factory.setConcurrency(3);
-   //     factory.setCommonErrorHandler(errorHandler());
+    //    factory.setCommonErrorHandler(errorHandler());
         return factory;
     }
 
 /*    private DefaultErrorHandler errorHandler() {
         var fixedBackOff = new FixedBackOff(1000L, 2L);
-        new DefaultErrorHandler(
+        DefaultErrorHandler defaultErrorHandler = new DefaultErrorHandler(
                 publishingRecover(),
                 fixedBackOff
-        )
+        );
+        defaultErrorHandler.setRetryListeners(
+                (record, ex, deliveryAttempt) ->
+                        log.info("Failed Record in Retry Listener  exception : {} , deliveryAttempt : {} ", ex.getMessage(), deliveryAttempt)
+        );  //메서드를 사용하여 재시도 중에 발생한 이벤트를 리스닝하는 리스너를 설정
+        return defaultErrorHandler;
     }
 
     private DeadLetterPublishingRecoverer publishingRecover() {

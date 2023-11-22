@@ -7,15 +7,12 @@ spring:
       on-profile: local
 
   kafka:
-    template:
-      default-topic: payment-events
     consumer:
       bootstrap-servers: localhost:9092,localhost:9093,localhost:9094
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       group-id: payment-events-listener-group
       auto-offset-reset: latest
-    topic: payment-events
     producer:
       bootstrap-servers: localhost:9092,localhost:9093,localhost:9094
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -29,6 +26,8 @@ spring:
   batch:
     jdbc:
       initialize-schema: always
+    job:
+      enabled: false # true: 애플리케이션 실행 시 등록된 job 실행 false: 비실행
   jpa:
     hibernate:
       ddl-auto: update

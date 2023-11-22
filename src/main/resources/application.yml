@@ -1,10 +1,11 @@
 server:
   port: 0
+
 spring:
   application:
     name: settle-service
   profiles:
-    default: secret
+    default: local
 
 springdoc:
   swagger-ui:
