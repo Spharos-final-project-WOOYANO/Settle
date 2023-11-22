@@ -107,7 +107,7 @@ public class SettleJobConfig {
         // properties.put("value.deserializer.type", PaymentResult.class.getName());
 
         KafkaItemReader<String, String> testItemReader = new KafkaItemReaderBuilder<String, String>()
-                .partitions(0,1,2)
+                .partitions(0)
                 .partitionOffsets(new HashMap<>())
                 .consumerProperties(properties)
                 .name("testItemReader")
@@ -214,7 +214,7 @@ public QuerydslPagingItemReader<PaymentResult> reader2(){
 
     @Bean // beanMapped()을 사용할때는 필수
     public JdbcBatchItemWriter<DailySettle> jdbcBatchItemWriter() {
-
+        log.info("jdbcBatchItemWriter");
         JdbcBatchItemWriter<DailySettle> build = new JdbcBatchItemWriterBuilder<DailySettle>()
                 .dataSource(dataSource)
                 .sql("INSERT INTO Daily_Settle(start_Date, total_Amount, client_Email, settle_Status, fee, pay_Out_Amount) "
