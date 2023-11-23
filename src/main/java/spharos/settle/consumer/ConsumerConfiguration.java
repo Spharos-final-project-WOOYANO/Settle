@@ -1,5 +1,7 @@
 package spharos.settle.consumer;
 
+import static org.apache.kafka.clients.CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -49,7 +51,7 @@ public class ConsumerConfiguration {
     @Bean
     public Properties stringConsumerConfigs() {
         Properties props = new Properties();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        props.put(BOOTSTRAP_SERVERS_CONFIG, "kafka1:9092");
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "settle");
