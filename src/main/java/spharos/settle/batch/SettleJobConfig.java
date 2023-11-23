@@ -58,7 +58,6 @@ import spharos.settle.dto.PaymentResult;
 public class SettleJobConfig {
 
     private final EntityManagerFactory entityManagerFactory;
-    private final LocalContainerEntityManagerFactoryBean readerEntityManagerFactory;
     private final DataSource dataSource;
     private final PlatformTransactionManager transactionManager;
     private final JobRepository jobRepository;
@@ -67,11 +66,7 @@ public class SettleJobConfig {
     private final PaymentItemProcessor paymentItemProcessor;
     private final SettleItemWriter settleItemWriter;
 
-    private final KafkaProperties properties;
-    private final ObjectMapper objectMapper;
-    private static final String TOPIC_NAME = "payment-events";
-    private final KafkaProperties kafkaProperties;
-    private final ConsumerConfiguration configuration;
+    private final ConsumerConfiguration consumerConfiguration;
 
     @Bean
     public Job createJob() {
@@ -100,13 +95,8 @@ public class SettleJobConfig {
     @Bean
     @StepScope
     KafkaItemReader<String, String> reader4() {
-       // Properties props = JobConfig.createProperty(kafkaProperties, ConsumerGroup.REVIEW_JOB);
-        Map<String, Object> stringObjectMap = configuration.stringConsumerConfigs();
-        Properties properties = new Properties();
-        log.info("stringObjectMap={}",stringObjectMap.entrySet());
-        properties.putAll(stringObjectMap);
-        // properties.put("value.deserializer.type", PaymentResult.class.getName());
-
+        Properties properties = consumerConfiguration.stringConsumerConfigs();
+        log.info("entry={}",properties.entrySet());
         KafkaItemReader<String, String> testItemReader = new KafkaItemReaderBuilder<String, String>()
                 .partitions(0)
                 .partitionOffsets(new HashMap<>())
