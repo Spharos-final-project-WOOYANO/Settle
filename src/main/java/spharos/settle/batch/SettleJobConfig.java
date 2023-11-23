@@ -77,7 +77,6 @@ public class SettleJobConfig {
     }
 
     @Bean
-    @JobScope
     public Step settleStep() {
         return new StepBuilder("settleStep", jobRepository)
                 .<String, DailySettle>chunk(CHUNK_SIZE,transactionManager) // Chunk 크기를 지정
