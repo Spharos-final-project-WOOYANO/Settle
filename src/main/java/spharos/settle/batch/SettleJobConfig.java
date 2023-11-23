@@ -206,7 +206,7 @@ public QuerydslPagingItemReader<PaymentResult> reader2(){
         log.info("jdbcBatchItemWriter");
         JdbcBatchItemWriter<DailySettle> build = new JdbcBatchItemWriterBuilder<DailySettle>()
                 .dataSource(dataSource)
-                .sql("INSERT INTO Daily_Settle(start_Date, total_Amount, client_Email, settle_Status, fee, pay_Out_Amount) "
+                .sql("INSERT INTO daily_settle(start_Date, total_Amount, client_Email, settle_Status, fee, pay_Out_Amount) "
                         + "VALUES (:settlementDate, :totalAmount, :clientEmail, :settleType, :fee, :payOutAmount)")
                 .beanMapped()
                 .build();
