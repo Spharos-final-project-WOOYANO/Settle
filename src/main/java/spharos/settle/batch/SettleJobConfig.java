@@ -93,7 +93,6 @@ public class SettleJobConfig {
 
 
     @Bean
-    @StepScope
     KafkaItemReader<String, String> reader4() {
         Properties properties = consumerConfiguration.stringConsumerConfigs();
         log.info("entry={}",properties.entrySet());
