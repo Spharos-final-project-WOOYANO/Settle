@@ -53,7 +53,7 @@ public class ConsumerConfiguration {
     @Bean
     public Properties stringConsumerConfigs() {
         Properties props = new Properties();
-        props.put(BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        props.put(BOOTSTRAP_SERVERS_CONFIG, "3.35.62.185:9092");
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "settle");
