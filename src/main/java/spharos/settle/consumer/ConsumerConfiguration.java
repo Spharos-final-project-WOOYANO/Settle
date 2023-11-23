@@ -2,6 +2,7 @@ package spharos.settle.consumer;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.TopicPartition;
@@ -29,13 +30,9 @@ import org.springframework.beans.factory.annotation.Value;
 
 @Configuration
 @Slf4j
-@EnableConfigurationProperties(KafkaProperties.class)
 public class ConsumerConfiguration {
-    @Autowired
-    KafkaProperties properties;
 
-    @Autowired
-    KafkaTemplate kafkaTemplate;
+
 
     /*public ConsumerConfiguration(KafkaProperties properties) {
         this.properties = properties;
@@ -43,30 +40,30 @@ public class ConsumerConfiguration {
     @Value("${spring.kafka.consumer.bootstrap-servers}")
     private String bootstrapServers;
 
-    @Value("${topics.retry:library-events.RETRY}")
+/*    @Value("${topics.retry:library-events.RETRY}")
     private String retryTopic;
 
     @Value("${topics.dlt:library-events.DLT}")
-    private String deadLetterTopic;
+    private String deadLetterTopic;*/
 
     @Bean
-    public Map<String, Object> stringConsumerConfigs() {
-        Map<String, Object> props = new HashMap<>();
+    public Properties stringConsumerConfigs() {
+        Properties props = new Properties();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "settle");
-        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "500");
+      //  props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+      //  props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "500");
         return props;
     }
 
-    @Bean
+/*    @Bean
     public ConsumerFactory<String, String> stringConsumerFactory() {
         return new DefaultKafkaConsumerFactory<>(stringConsumerConfigs());
-    }
+    }*/
 
-    @Bean
+/*    @Bean
     public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, String> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
@@ -75,7 +72,7 @@ public class ConsumerConfiguration {
         factory.setConcurrency(1);
     //    factory.setCommonErrorHandler(errorHandler());
         return factory;
-    }
+    }*/
 
 /*    private DefaultErrorHandler errorHandler() {
         var fixedBackOff = new FixedBackOff(1000L, 2L);
@@ -105,7 +102,7 @@ public class ConsumerConfiguration {
         return recoverer;
     }*/
 
-    @Bean
+/*    @Bean
     public Map<String, Object> DTOConsumerConfigs() {
 
         Map<String, Object> props = new HashMap<>();
@@ -133,5 +130,5 @@ public class ConsumerConfiguration {
         factory.setConsumerFactory(DTOConsumerFactory());
       //  factory.setBatchListener(true);
         return factory;
-    }
+    }*/
 }
