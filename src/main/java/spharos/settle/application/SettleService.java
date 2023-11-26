@@ -1,18 +1,27 @@
 package spharos.settle.application;
 
+import jakarta.annotation.Resource;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.RedisCallback;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 
 import spharos.settle.domain.settle.DailySettle;
 import spharos.settle.dto.DailySettleListResponse;
 import spharos.settle.dto.DailySettleResponse;
 import spharos.settle.infrastructure.DailySettleRepository;
+import spharos.settle.infrastructure.RedisRepository;
 
 @Service
 @Slf4j
@@ -20,6 +29,11 @@ import spharos.settle.infrastructure.DailySettleRepository;
 public class SettleService implements SettleServiceImpl {
 
     private final DailySettleRepository dailySettleRepository;
+
+    @Resource(name = "redisTemplate")
+    private ValueOperations<String, Integer> valusOps;
+
+    private final RedisTemplate<String, String> redisTemplate;
 
     public Page<DailySettleListResponse> getSettleInRange(String clientEmail, LocalDate startDate, LocalDate endDate,
                                                           Pageable pageable) {
@@ -47,6 +61,18 @@ public class SettleService implements SettleServiceImpl {
     }
 
 
+    public List<String> getAllKeys() {
+        return redisTemplate.execute((RedisCallback<List<String>>) connection -> {
+            List<String> keys = new ArrayList<>();
+            Cursor<byte[]> cursor = connection.scan(ScanOptions.scanOptions().match("*").build());
+
+            while (cursor.hasNext()) {
+                keys.add(new String(cursor.next()));
+            }
+
+            return keys;
+        });
+    }
 
    /* // 결제 db직접 연결해서 정산
     // 입금 요청상태
