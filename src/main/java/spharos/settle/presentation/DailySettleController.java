@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -21,6 +22,7 @@ import spharos.settle.dto.DailySettleResponse;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 @RequestMapping("/api/v1/settle")
 public class DailySettleController {
     private final SettleService settleService;
@@ -63,6 +65,12 @@ public class DailySettleController {
        batchScheduler.runJob();
     }
 
+    @GetMapping("/save")
+    public List<String> save(){
+        List<String> allKeys = settleService.getAllKeys();
+        return allKeys;
+      //  log.info("allKeys = {}",allKeys);
+    }
 
 
 }

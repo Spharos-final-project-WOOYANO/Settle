@@ -38,6 +38,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import spharos.settle.batch.expression.Expression;
@@ -68,6 +69,8 @@ public class SettleJobConfig {
 
     private final ConsumerConfiguration consumerConfiguration;
 
+    private final RedisTemplate<String, String> redisTemplate;
+
     @Bean
     public Job createJob() {
         return new JobBuilder("settleJob", jobRepository)
@@ -96,7 +99,7 @@ public class SettleJobConfig {
         Properties properties = consumerConfiguration.stringConsumerConfigs();
         log.info("entry={}",properties.entrySet());
         KafkaItemReader<String, String> testItemReader = new KafkaItemReaderBuilder<String, String>()
-                .partitions(0)
+                .partitions(0,1,2)
                 .partitionOffsets(new HashMap<>())
                 .consumerProperties(properties)
                 .name("testItemReader")
