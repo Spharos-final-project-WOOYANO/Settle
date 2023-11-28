@@ -1,16 +1,10 @@
 package spharos.settle.batch;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.querydsl.core.types.Projections;
-import com.querydsl.jpa.impl.JPAQuery;
 import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.Tuple;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import javax.sql.DataSource;
@@ -18,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
@@ -32,23 +25,14 @@ import org.springframework.batch.item.database.builder.JpaCursorItemReaderBuilde
 import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilder;
 import org.springframework.batch.item.kafka.KafkaItemReader;
 import org.springframework.batch.item.kafka.builder.KafkaItemReaderBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
-import spharos.settle.batch.expression.Expression;
 import spharos.settle.batch.processor.PaymentItemProcessor;
-import spharos.settle.batch.reader.QuerydslNoOffsetIdPagingItemReader;
-import spharos.settle.batch.reader.QuerydslNoOffsetNumberOptions;
-import spharos.settle.batch.reader.QuerydslNoOffsetPagingItemReader;
-import spharos.settle.batch.reader.QuerydslPagingItemReader;
 import spharos.settle.batch.writer.SettleItemWriter;
-import spharos.settle.consumer.ConsumerConfiguration;
+import spharos.settle.global.config.kafka.consumer.ConsumerConfiguration;
 import spharos.settle.domain.settle.DailySettle;
 import spharos.settle.dto.PaymentResult;
 
@@ -70,6 +54,9 @@ public class SettleJobConfig {
     private final ConsumerConfiguration consumerConfiguration;
 
     private final RedisTemplate<String, String> redisTemplate;
+
+    @Value("${spring.kafka.topic}")
+    private String topic;
 
     @Bean
     public Job createJob() {
@@ -95,20 +82,22 @@ public class SettleJobConfig {
 
 
     @Bean
-    KafkaItemReader<String, String> reader4() {
+    public KafkaItemReader<String, String> reader4() {
         Properties properties = consumerConfiguration.stringConsumerConfigs();
+
         log.info("entry={}",properties.entrySet());
         KafkaItemReader<String, String> testItemReader = new KafkaItemReaderBuilder<String, String>()
                 .partitions(0,1,2)
                 .partitionOffsets(new HashMap<>())
                 .consumerProperties(properties)
-                .name("testItemReader")
+                .name("KafkaItemReader")
                 .saveState(true)
                 .pollTimeout(Duration.ofSeconds(10L))
-                .topic("test-events")
+                .topic(topic)
                 .build();
 
         log.info("reader={}",testItemReader);
+
         return testItemReader;
     }
 

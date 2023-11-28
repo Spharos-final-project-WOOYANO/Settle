@@ -1,4 +1,4 @@
-package spharos.settle.consumer;
+package spharos.settle.global.config.kafka.consumer;
 
 import static org.apache.kafka.clients.CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG;
 
