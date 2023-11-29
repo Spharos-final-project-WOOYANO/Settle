@@ -28,17 +28,7 @@ public class DailySettleController {
     private final SettleService settleService;
     private final BatchScheduler batchScheduler;
 
-   /* @GetMapping("/test")
-    public  List<PaymentResult> test() {
-        String requestDate = "2023-11-08";
-        Map<String, Object> parameters = new LinkedHashMap<>();
-        LocalDateTime parse = LocalDateTime.parse(requestDate + "T00:00:00");
-        LocalDateTime parse1 = LocalDateTime.parse(requestDate + "T23:59:59");
 
-        List<PaymentResult> test = settleService.test(parse,parse1);
-        return  test;
-        //       return paymentResultResponseLists;
-    }*/
     //정산 리스트 조회
    @Operation(summary = "정산 리스트 조회", description = "정산 리스트 날짜 범위 설정해서 조회")
     @GetMapping("/list")
@@ -60,17 +50,12 @@ public class DailySettleController {
         return new BaseResponse<>(settle);
     }
 
-    @GetMapping("/test")
+ /*   @GetMapping("/test")
     public void test(){
        batchScheduler.runJob();
-    }
+    }*/
 
-    @GetMapping("/save")
-    public List<String> save(){
-        List<String> allKeys = settleService.getAllKeys();
-        return allKeys;
-      //  log.info("allKeys = {}",allKeys);
-    }
+
 
 
 }

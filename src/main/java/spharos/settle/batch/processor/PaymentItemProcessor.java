@@ -21,7 +21,6 @@ import org.springframework.batch.item.ParseException;
 import org.springframework.batch.item.UnexpectedInputException;
 import org.springframework.stereotype.Component;
 import spharos.settle.domain.settle.DailySettle;
-import spharos.settle.domain.settle.SettleStatus;
 import spharos.settle.dto.PaymentResult;
 
 @Component
@@ -33,9 +32,7 @@ public class PaymentItemProcessor implements ItemProcessor<String, DailySettle> 
 
     @Override
     public DailySettle process(String item) throws Exception {
-        if (item == null) {
-            throw new IllegalArgumentException("item is null");
-        }
+
 
         PaymentResult paymentResult = objectMapper.readValue(item, PaymentResult.class);
         log.info("paymentResult : {}", paymentResult);
@@ -44,7 +41,6 @@ public class PaymentItemProcessor implements ItemProcessor<String, DailySettle> 
 
         long fee = (long) (totalAmount * vat);
         long paymentAmount = totalAmount - fee;
-        //SettleStatus settleStatus = SettleStatus.DEPOSIT_SCHEDULED;
         String settleStatus = "0";
 
 

@@ -21,7 +21,6 @@ import spharos.settle.domain.settle.DailySettle;
 import spharos.settle.dto.DailySettleListResponse;
 import spharos.settle.dto.DailySettleResponse;
 import spharos.settle.infrastructure.DailySettleRepository;
-import spharos.settle.infrastructure.RedisRepository;
 
 @Service
 @Slf4j

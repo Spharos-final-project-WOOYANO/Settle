@@ -1,5 +1,6 @@
 package spharos.settle.batch;
 
+import com.querydsl.core.types.Projections;
 import jakarta.persistence.EntityManagerFactory;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -31,6 +32,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 import spharos.settle.batch.processor.PaymentItemProcessor;
+import spharos.settle.batch.reader.QuerydslPagingItemReader;
 import spharos.settle.batch.writer.SettleItemWriter;
 import spharos.settle.global.config.kafka.consumer.ConsumerConfiguration;
 import spharos.settle.domain.settle.DailySettle;
@@ -101,7 +103,19 @@ public class SettleJobConfig {
         return testItemReader;
     }
 
+    @Bean
+    public JdbcBatchItemWriter<DailySettle> jdbcBatchItemWriter() {
+        log.info("jdbcBatchItemWriter");
+        JdbcBatchItemWriter<DailySettle> build = new JdbcBatchItemWriterBuilder<DailySettle>()
+                .dataSource(dataSource)
+                .sql("INSERT INTO daily_settle(start_Date, total_Amount, client_Email, settle_Status, fee, pay_Out_Amount) "
+                        + "VALUES (:settlementDate, :totalAmount, :clientEmail, :settleType, :fee, :payOutAmount)")
+                .beanMapped()
+                .build();
+        return build;
+    }
 
+/*
 
 
     //@Value("#{jobParameters['requestDate']}") String requestDate
@@ -157,7 +171,6 @@ public class SettleJobConfig {
 
 
 
-/*
 @Bean
 public QuerydslPagingItemReader<PaymentResult> reader2(){
     String requestDate = "2023-11-09";
@@ -178,7 +191,6 @@ public QuerydslPagingItemReader<PaymentResult> reader2(){
     //Projections.fields(PaymentResult.class,payment.clientEmail,payment.totalAmount.sum().as("totalAmount"))
 }
 
-*/
 
 
 
@@ -191,18 +203,8 @@ public QuerydslPagingItemReader<PaymentResult> reader2(){
         jpaItemWriter.setEntityManagerFactory(entityManagerFactory);
         return jpaItemWriter;
     }
+*/
 
 
-    @Bean // beanMapped()을 사용할때는 필수
-    public JdbcBatchItemWriter<DailySettle> jdbcBatchItemWriter() {
-        log.info("jdbcBatchItemWriter");
-        JdbcBatchItemWriter<DailySettle> build = new JdbcBatchItemWriterBuilder<DailySettle>()
-                .dataSource(dataSource)
-                .sql("INSERT INTO daily_settle(start_Date, total_Amount, client_Email, settle_Status, fee, pay_Out_Amount) "
-                        + "VALUES (:settlementDate, :totalAmount, :clientEmail, :settleType, :fee, :payOutAmount)")
-                .beanMapped()
-                .build();
-        return build;
-    }
 
 }

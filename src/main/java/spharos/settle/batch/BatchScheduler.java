@@ -17,8 +17,7 @@ public class BatchScheduler {
     @Autowired
     private SettleJobConfig settleJob;
 
-   //@Scheduled(cron = "0 0 2 * * ?")
-    //@Scheduled(fixedRate = 200000) // 10초마다 실행
+    @Scheduled(cron = "0 0 3 * * ?")
     public void runJob() {
         try {
             JobParameters jobParameters = new JobParametersBuilder()

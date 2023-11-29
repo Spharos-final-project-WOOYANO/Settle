@@ -40,11 +40,6 @@ public class DailySettle {
     private long payOutAmount; //정산 지급금액
 
 
-
-//    @Column(name = "settle_Status")
- //@Enumerated(EnumType.STRING)
-   // @Convert(converter = SettleStatusConverter.class)
-   // @Enumerated(EnumType.STRING)
     @Column(name = "settle_Status")
     private String settleType; //정산 상태 (정산 완료, 정산 예정)
 

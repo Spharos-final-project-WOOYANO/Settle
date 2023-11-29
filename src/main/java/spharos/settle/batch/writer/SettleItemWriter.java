@@ -15,11 +15,10 @@ import spharos.settle.infrastructure.DailySettleRepository;
 @Slf4j
 public class SettleItemWriter implements ItemWriter<DailySettle> {
     private final DailySettleRepository dailySettleRepository;
-    private static final double vat = 0.02;
+
 
     @Override
     public void write(Chunk<? extends DailySettle> chunk) throws Exception {
-    log.info("chunk : {}", chunk);
 
     for(DailySettle dailySettle : chunk){
         dailySettleRepository.save(dailySettle);
